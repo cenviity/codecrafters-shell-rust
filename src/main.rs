@@ -1,10 +1,10 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-fn main() {
+fn main() -> io::Result<()> {
     loop {
         print!("$ ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush()?;
 
         // Wait for user input
         let stdin = io::stdin();
