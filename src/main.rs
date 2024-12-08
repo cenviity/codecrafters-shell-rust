@@ -43,7 +43,9 @@ fn cmd_type(command: &str) {
             .split(":")
             .map(|path_dir| Path::new(path_dir).join(command));
         if let Some(path) = full_paths.find(|path| path.is_file()) {
-            let path = path.to_str().expect("full path to command should be valid");
+            let path = path
+                .to_str()
+                .expect("full path to command should be valid Unicode");
             println!("{command} is {path}");
         } else {
             println!("{command}: not found");
