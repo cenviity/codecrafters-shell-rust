@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process;
+use std::{path::Path, process};
 
 const BUILTIN_COMMANDS: [&str; 3] = ["exit", "echo", "type"];
 
@@ -38,7 +38,17 @@ fn cmd_echo(tokens: &[&str]) {
 fn cmd_type(command: &str) {
     if BUILTIN_COMMANDS.contains(&command) {
         println!("{command} is a shell builtin");
-    } else {
-        println!("{command}: not found");
+    } else if let Ok(path) = std::env::var("PATH") {
+        let mut full_paths = path
+            .split(":")
+            .map(|path_dir| Path::new(path_dir).join(command));
+        if let Some(full_path) = full_paths.find(|full_path| full_path.is_file()) {
+            let full_path = full_path
+                .to_str()
+                .expect("full path to command should be valid");
+            println!("{command} is {full_path}");
+        } else {
+            println!("{command}: not found");
+        }
     }
 }
