@@ -5,7 +5,7 @@ use std::{
     process::{self, Command},
 };
 
-const BUILTIN_COMMANDS: [&str; 3] = ["exit", "echo", "type"];
+const BUILTIN_COMMANDS: [&str; 4] = ["exit", "echo", "type", "pwd"];
 
 fn main() -> io::Result<()> {
     loop {
@@ -23,6 +23,7 @@ fn main() -> io::Result<()> {
                 ["exit", code] => cmd_exit(code),
                 ["echo", ..] => cmd_echo(&tokens[1..])?,
                 ["type", ..] => cmd_type(&tokens[1..])?,
+                ["pwd"] => cmd_pwd()?,
                 [command, ..] => cmd(command, &tokens[1..])?,
                 _ => unreachable!(),
             }
@@ -58,6 +59,17 @@ fn cmd_type(commands: &[&str]) -> io::Result<()> {
             }
         }
     }
+    Ok(())
+}
+
+fn cmd_pwd() -> io::Result<()> {
+    let current_dir = std::env::current_dir()?;
+    println!(
+        "{}",
+        current_dir
+            .to_str()
+            .expect("path to current working directory should be valid Unicode")
+    );
     Ok(())
 }
 
