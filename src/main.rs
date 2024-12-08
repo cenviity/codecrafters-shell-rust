@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
 
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
-            let tokens: Vec<_> = input.split_whitespace().collect();
+            let tokens = tokens(input);
             match tokens[0] {
                 "exit" => process::exit(0),
                 "echo" => println!("{}", tokens[1..].join(" ")),
@@ -21,4 +21,8 @@ fn main() -> io::Result<()> {
             }
         }
     }
+}
+
+fn tokens(input: &str) -> Vec<&str> {
+    input.split_whitespace().collect()
 }
