@@ -21,8 +21,8 @@ fn main() -> io::Result<()> {
             let tokens: Vec<_> = input.split_whitespace().collect();
             match tokens[..] {
                 ["exit", code] => cmd_exit(code),
-                ["echo", ..] => cmd_echo(&tokens[1..]),
-                ["type", ..] => cmd_type(&tokens[1..]),
+                ["echo", ..] => cmd_echo(&tokens[1..])?,
+                ["type", ..] => cmd_type(&tokens[1..])?,
                 [command, ..] => cmd(command, &tokens[1..])?,
                 _ => unreachable!(),
             }
@@ -35,11 +35,12 @@ fn cmd_exit(code: &str) {
     process::exit(code);
 }
 
-fn cmd_echo(tokens: &[&str]) {
+fn cmd_echo(tokens: &[&str]) -> io::Result<()> {
     println!("{}", tokens.join(" "));
+    Ok(())
 }
 
-fn cmd_type(commands: &[&str]) {
+fn cmd_type(commands: &[&str]) -> io::Result<()> {
     for command in commands {
         if BUILTIN_COMMANDS.contains(command) {
             println!("{command} is a shell builtin");
@@ -57,6 +58,7 @@ fn cmd_type(commands: &[&str]) {
             }
         }
     }
+    Ok(())
 }
 
 fn cmd(command: &str, args: &[&str]) -> io::Result<()> {
