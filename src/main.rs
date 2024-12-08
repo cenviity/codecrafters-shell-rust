@@ -14,10 +14,10 @@ fn main() -> io::Result<()> {
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
             let mut input_words = input.split_whitespace();
-            if let Some("exit") = input_words.next() {
-                process::exit(0);
-            } else {
-                println!("{input}: command not found");
+            match input_words.next() {
+                Some("exit") => process::exit(0),
+                Some("echo") => println!("{}", input_words.collect::<Vec<_>>().join(" ")),
+                _ => println!("{input}: command not found"),
             }
         }
     }
