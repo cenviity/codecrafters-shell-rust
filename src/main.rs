@@ -1,6 +1,9 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{path::Path, process};
+use std::{
+    path::Path,
+    process::{self, Command},
+};
 
 const BUILTIN_COMMANDS: [&str; 3] = ["exit", "echo", "type"];
 
@@ -20,7 +23,8 @@ fn main() -> io::Result<()> {
                 ["exit", code] => cmd_exit(code),
                 ["echo", ..] => cmd_echo(&tokens[1..]),
                 ["type", ..] => cmd_type(&tokens[1..]),
-                _ => println!("{input}: command not found"),
+                [command, ..] => cmd(command, &tokens[1..])?,
+                _ => unreachable!(),
             }
         }
     }
@@ -52,5 +56,14 @@ fn cmd_type(commands: &[&str]) {
                 println!("{command}: not found");
             }
         }
+    }
+}
+
+fn cmd(command: &str, args: &[&str]) -> io::Result<()> {
+    if let Ok(output) = Command::new(command).args(args).output() {
+        io::stdout().write_all(&output.stdout)
+    } else {
+        println!("{command}: command not found");
+        Ok(())
     }
 }
