@@ -15,7 +15,7 @@ fn main() -> io::Result<()> {
 
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
-            let tokens = tokens(input);
+            let tokens: Vec<_> = input.split_whitespace().collect();
             match tokens[..] {
                 ["exit", code] => cmd_exit(code),
                 ["echo", ..] => cmd_echo(&tokens[1..]),
@@ -41,8 +41,4 @@ fn cmd_type(command: &str) {
     } else {
         println!("{command}: not found");
     }
-}
-
-fn tokens(input: &str) -> Vec<&str> {
-    input.split_whitespace().collect()
 }
