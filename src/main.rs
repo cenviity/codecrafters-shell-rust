@@ -2,6 +2,8 @@
 use std::io::{self, Write};
 use std::process;
 
+const BUILTIN_COMMANDS: [&str; 3] = ["exit", "echo", "type"];
+
 fn main() -> io::Result<()> {
     loop {
         print!("$ ");
@@ -20,6 +22,13 @@ fn main() -> io::Result<()> {
                     process::exit(code);
                 }
                 ["echo", ..] => println!("{}", tokens[1..].join(" ")),
+                ["type", command] => {
+                    if BUILTIN_COMMANDS.contains(&command) {
+                        println!("{command} is a shell builtin");
+                    } else {
+                        println!("{command}: not found");
+                    }
+                }
                 _ => println!("{input}: command not found"),
             }
         }
