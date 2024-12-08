@@ -14,9 +14,12 @@ fn main() -> io::Result<()> {
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
             let tokens = tokens(input);
-            match tokens[0] {
-                "exit" => process::exit(0),
-                "echo" => println!("{}", tokens[1..].join(" ")),
+            match tokens[..] {
+                ["exit", code] => {
+                    let code: i32 = code.parse().expect("exit code should be a valid i32 value");
+                    process::exit(code);
+                }
+                ["echo", ..] => println!("{}", tokens[1..].join(" ")),
                 _ => println!("{input}: command not found"),
             }
         }
