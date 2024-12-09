@@ -76,7 +76,7 @@ impl<'a> Command<'a> {
         for command in commands {
             if Self::BUILTIN_COMMANDS.contains(command) {
                 println!("{command} is a shell builtin");
-            } else if let Ok(path_env) = std::env::var("PATH") {
+            } else if let Ok(path_env) = env::var("PATH") {
                 let mut full_paths = path_env
                     .split(":")
                     .map(|path_dir| Path::new(path_dir).join(command));
@@ -91,7 +91,7 @@ impl<'a> Command<'a> {
     }
 
     fn cmd_pwd() -> io::Result<()> {
-        let current_dir = std::env::current_dir()?;
+        let current_dir = env::current_dir()?;
         println!("{}", current_dir.display());
         Ok(())
     }
