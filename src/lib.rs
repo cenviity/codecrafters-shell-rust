@@ -76,15 +76,21 @@ impl<'a> Command<'a> {
         for command in commands {
             if Self::BUILTIN_COMMANDS.contains(command) {
                 println!("{command} is a shell builtin");
-            } else if let Ok(path_env) = env::var("PATH") {
-                let mut full_paths = path_env
-                    .split(":")
-                    .map(|path_dir| Path::new(path_dir).join(command));
-                if let Some(path) = full_paths.find(|path| path.is_file()) {
-                    println!("{} is {}", command, path.display());
-                } else {
-                    eprintln!("{command}: not found");
-                }
+                continue;
+            }
+
+            let Ok(path_env) = env::var("PATH") else {
+                eprintln!("Failed to read from `PATH` environment variable");
+                return Ok(());
+            };
+
+            let mut full_paths = path_env
+                .split(":")
+                .map(|path_dir| Path::new(path_dir).join(command));
+            if let Some(path) = full_paths.find(|path| path.is_file()) {
+                println!("{} is {}", command, path.display());
+            } else {
+                eprintln!("{command}: not found");
             }
         }
         Ok(())
