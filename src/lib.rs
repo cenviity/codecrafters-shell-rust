@@ -26,7 +26,7 @@ pub enum Command<'a> {
 }
 
 impl<'a> Command<'a> {
-    const BUILTIN_COMMANDS: [&'static str; 4] = ["exit", "echo", "type", "pwd"];
+    const BUILTIN_COMMANDS: [&'static str; 5] = ["exit", "echo", "type", "pwd", "cd"];
 
     pub fn parse<'input: 'a>(tokens: Vec<&'input str>) -> Self {
         match tokens[..] {
