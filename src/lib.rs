@@ -86,7 +86,7 @@ impl<'a> Command<'a> {
             }
 
             let Ok(path_env) = env::var("PATH") else {
-                eprintln!("Failed to read from `PATH` environment variable");
+                eprintln!("Failed to read from $PATH environment variable");
                 return Ok(());
             };
 
