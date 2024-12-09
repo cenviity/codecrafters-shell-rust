@@ -24,8 +24,7 @@ enum Command<'a> {
 
 fn main() -> io::Result<()> {
     loop {
-        print!("$ ");
-        io::stdout().flush()?;
+        show_prompt()?;
 
         // Wait for user input
         let stdin = io::stdin();
@@ -39,6 +38,11 @@ fn main() -> io::Result<()> {
         let command = Command::parse(tokens);
         command.execute()?
     }
+}
+
+fn show_prompt() -> io::Result<()> {
+    print!("$ ");
+    io::stdout().flush()
 }
 
 impl<'a> Command<'a> {
