@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{path::Path, process};
+use std::{env, path::Path, process};
 
 enum Command<'a> {
     Exit {
@@ -13,6 +13,9 @@ enum Command<'a> {
         args: Vec<&'a str>,
     },
     Pwd,
+    Cd {
+        path: &'a Path,
+    },
     Other {
         command: &'a str,
         args: Vec<&'a str>,
@@ -43,6 +46,9 @@ fn main() -> io::Result<()> {
                     args: tokens[1..].to_owned(),
                 },
                 ["pwd"] => Command::Pwd,
+                ["cd", path] => Command::Cd {
+                    path: Path::new(path),
+                },
                 [command, ..] => Command::Other {
                     command,
                     args: tokens[1..].to_owned(),
@@ -63,6 +69,7 @@ impl Command<'_> {
             Command::Echo { args } => Self::cmd_echo(&args),
             Command::Type { args } => Self::cmd_type(&args),
             Command::Pwd => Self::cmd_pwd(),
+            Command::Cd { path } => Self::cmd_cd(path),
             Command::Other { command, args } => Self::cmd(command, &args),
         }
     }
@@ -97,6 +104,13 @@ impl Command<'_> {
     fn cmd_pwd() -> io::Result<()> {
         let current_dir = std::env::current_dir()?;
         println!("{}", current_dir.display());
+        Ok(())
+    }
+
+    fn cmd_cd(path: &Path) -> io::Result<()> {
+        if env::set_current_dir(path).is_err() {
+            println!("cd: {}: No such file or directory", path.display());
+        }
         Ok(())
     }
 
