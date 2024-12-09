@@ -50,10 +50,7 @@ fn cmd_type(commands: &[&str]) -> io::Result<()> {
                 .split(":")
                 .map(|path_dir| Path::new(path_dir).join(command));
             if let Some(path) = full_paths.find(|path| path.is_file()) {
-                let path = path
-                    .to_str()
-                    .expect("full path to command should be valid Unicode");
-                println!("{command} is {path}");
+                println!("{} is {}", command, path.display());
             } else {
                 println!("{command}: not found");
             }
@@ -64,12 +61,7 @@ fn cmd_type(commands: &[&str]) -> io::Result<()> {
 
 fn cmd_pwd() -> io::Result<()> {
     let current_dir = std::env::current_dir()?;
-    println!(
-        "{}",
-        current_dir
-            .to_str()
-            .expect("path to current working directory should be valid Unicode")
-    );
+    println!("{}", current_dir.display());
     Ok(())
 }
 
