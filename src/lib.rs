@@ -83,7 +83,7 @@ impl<'a> Command<'a> {
                 if let Some(path) = full_paths.find(|path| path.is_file()) {
                     println!("{} is {}", command, path.display());
                 } else {
-                    println!("{command}: not found");
+                    eprintln!("{command}: not found");
                 }
             }
         }
@@ -98,7 +98,7 @@ impl<'a> Command<'a> {
 
     fn cmd_cd(path: &Path) -> io::Result<()> {
         if env::set_current_dir(path).is_err() {
-            println!("cd: {}: No such file or directory", path.display());
+            eprintln!("cd: {}: No such file or directory", path.display());
         }
         Ok(())
     }
@@ -107,7 +107,7 @@ impl<'a> Command<'a> {
         if let Ok(output) = process::Command::new(command).args(args).output() {
             io::stdout().write_all(&output.stdout)
         } else {
-            println!("{command}: command not found");
+            eprintln!("{command}: command not found");
             Ok(())
         }
     }
