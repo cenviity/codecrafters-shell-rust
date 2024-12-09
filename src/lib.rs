@@ -110,12 +110,11 @@ impl<'a> Command<'a> {
     }
 
     fn cmd(command: &str, args: &[&str]) -> io::Result<()> {
-        if let Ok(output) = process::Command::new(command).args(args).output() {
-            io::stdout().write_all(&output.stdout)
-        } else {
+        let Ok(output) = process::Command::new(command).args(args).output() else {
             eprintln!("{command}: command not found");
-            Ok(())
-        }
+            return Ok(());
+        };
+        io::stdout().write_all(&output.stdout)
     }
 }
 
