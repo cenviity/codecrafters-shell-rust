@@ -1,7 +1,7 @@
 use std::{
     env,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process,
 };
 
@@ -17,7 +17,7 @@ pub enum Command<'a> {
     },
     Pwd,
     Cd {
-        path: &'a Path,
+        path: PathBuf,
     },
     Other {
         command: &'a str,
@@ -41,9 +41,15 @@ impl<'a> Command<'a> {
                 args: tokens[1..].to_owned(),
             },
             ["pwd"] => Self::Pwd,
-            ["cd", path] => Self::Cd {
-                path: Path::new(path),
-            },
+            ["cd", path] => {
+                let path = match path {
+                    "~" => PathBuf::from(
+                        env::var("HOME").expect("$HOME environment variable should exist"),
+                    ),
+                    _ => PathBuf::from(path),
+                };
+                Self::Cd { path }
+            }
             [command, ..] => Self::Other {
                 command,
                 args: tokens[1..].to_owned(),
@@ -102,8 +108,8 @@ impl<'a> Command<'a> {
         Ok(())
     }
 
-    fn cmd_cd(path: &Path) -> io::Result<()> {
-        if env::set_current_dir(path).is_err() {
+    fn cmd_cd(path: PathBuf) -> io::Result<()> {
+        if env::set_current_dir(&path).is_err() {
             eprintln!("cd: {}: No such file or directory", path.display());
         }
         Ok(())
