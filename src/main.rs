@@ -34,34 +34,38 @@ fn main() -> io::Result<()> {
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
             let tokens: Vec<_> = input.split_whitespace().collect();
-            let command = match tokens[..] {
-                ["exit", code] => {
-                    let code: i32 = code.parse().expect("exit code should be a valid i32 value");
-                    Command::Exit { code }
-                }
-                ["echo", ..] => Command::Echo {
-                    args: tokens[1..].to_owned(),
-                },
-                ["type", ..] => Command::Type {
-                    args: tokens[1..].to_owned(),
-                },
-                ["pwd"] => Command::Pwd,
-                ["cd", path] => Command::Cd {
-                    path: Path::new(path),
-                },
-                [command, ..] => Command::Other {
-                    command,
-                    args: tokens[1..].to_owned(),
-                },
-                _ => unreachable!(),
-            };
+            let command = Command::parse(tokens);
             command.execute()?
         }
     }
 }
 
-impl Command<'_> {
+impl<'a> Command<'a> {
     const BUILTIN_COMMANDS: [&'static str; 4] = ["exit", "echo", "type", "pwd"];
+
+    fn parse<'input: 'a>(tokens: Vec<&'input str>) -> Self {
+        match tokens[..] {
+            ["exit", code] => {
+                let code: i32 = code.parse().expect("exit code should be a valid i32 value");
+                Self::Exit { code }
+            }
+            ["echo", ..] => Self::Echo {
+                args: tokens[1..].to_owned(),
+            },
+            ["type", ..] => Self::Type {
+                args: tokens[1..].to_owned(),
+            },
+            ["pwd"] => Self::Pwd,
+            ["cd", path] => Self::Cd {
+                path: Path::new(path),
+            },
+            [command, ..] => Self::Other {
+                command,
+                args: tokens[1..].to_owned(),
+            },
+            _ => unreachable!(),
+        }
+    }
 
     fn execute(self) -> io::Result<()> {
         match self {
