@@ -1,6 +1,6 @@
-use std::io::{self, Write};
+use std::io;
 
-use codecrafters_shell::Command;
+use codecrafters_shell::{show_prompt, Command};
 
 fn main() -> io::Result<()> {
     loop {
@@ -18,9 +18,4 @@ fn main() -> io::Result<()> {
         let command = Command::parse(tokens);
         command.execute()?
     }
-}
-
-fn show_prompt() -> io::Result<()> {
-    print!("$ ");
-    io::stdout().flush()
 }

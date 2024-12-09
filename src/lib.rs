@@ -112,3 +112,8 @@ impl<'a> Command<'a> {
         }
     }
 }
+
+pub fn show_prompt() -> io::Result<()> {
+    print!("$ ");
+    io::stdout().flush()
+}
