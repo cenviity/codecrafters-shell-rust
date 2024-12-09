@@ -30,13 +30,14 @@ fn main() -> io::Result<()> {
         // Wait for user input
         let stdin = io::stdin();
         let mut input = String::new();
-
-        if stdin.read_line(&mut input).is_ok() {
-            let input = input.trim();
-            let tokens: Vec<_> = input.split_whitespace().collect();
-            let command = Command::parse(tokens);
-            command.execute()?
+        if stdin.read_line(&mut input).is_err() {
+            continue;
         }
+
+        let input = input.trim();
+        let tokens: Vec<_> = input.split_whitespace().collect();
+        let command = Command::parse(tokens);
+        command.execute()?
     }
 }
 
