@@ -1,11 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{
-    path::Path,
-    process::{self},
-};
-
-const BUILTIN_COMMANDS: [&str; 4] = ["exit", "echo", "type", "pwd"];
+use std::{path::Path, process};
 
 enum Command<'a> {
     Exit {
@@ -36,22 +31,44 @@ fn main() -> io::Result<()> {
         if stdin.read_line(&mut input).is_ok() {
             let input = input.trim();
             let tokens: Vec<_> = input.split_whitespace().collect();
-            match tokens[..] {
-                ["exit", code] => Command::cmd_exit(code),
-                ["echo", ..] => Command::cmd_echo(&tokens[1..])?,
-                ["type", ..] => Command::cmd_type(&tokens[1..])?,
-                ["pwd"] => Command::cmd_pwd()?,
-                [command, ..] => Command::cmd(command, &tokens[1..])?,
+            let command = match tokens[..] {
+                ["exit", code] => {
+                    let code: i32 = code.parse().expect("exit code should be a valid i32 value");
+                    Command::Exit { code }
+                }
+                ["echo", ..] => Command::Echo {
+                    args: tokens[1..].to_owned(),
+                },
+                ["type", ..] => Command::Type {
+                    args: tokens[1..].to_owned(),
+                },
+                ["pwd"] => Command::Pwd,
+                [command, ..] => Command::Other {
+                    command,
+                    args: tokens[1..].to_owned(),
+                },
                 _ => unreachable!(),
-            }
+            };
+            command.execute()?
         }
     }
 }
 
 impl Command<'_> {
-    fn cmd_exit(code: &str) {
-        let code: i32 = code.parse().expect("exit code should be a valid i32 value");
-        process::exit(code);
+    const BUILTIN_COMMANDS: [&'static str; 4] = ["exit", "echo", "type", "pwd"];
+
+    fn execute(self) -> io::Result<()> {
+        match self {
+            Command::Exit { code } => Self::cmd_exit(code),
+            Command::Echo { args } => Self::cmd_echo(&args),
+            Command::Type { args } => Self::cmd_type(&args),
+            Command::Pwd => Self::cmd_pwd(),
+            Command::Other { command, args } => Self::cmd(command, &args),
+        }
+    }
+
+    fn cmd_exit(code: i32) -> io::Result<()> {
+        process::exit(code)
     }
 
     fn cmd_echo(tokens: &[&str]) -> io::Result<()> {
@@ -61,7 +78,7 @@ impl Command<'_> {
 
     fn cmd_type(commands: &[&str]) -> io::Result<()> {
         for command in commands {
-            if BUILTIN_COMMANDS.contains(command) {
+            if Self::BUILTIN_COMMANDS.contains(command) {
                 println!("{command} is a shell builtin");
             } else if let Ok(path_env) = std::env::var("PATH") {
                 let mut full_paths = path_env
