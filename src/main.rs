@@ -65,12 +65,12 @@ impl Command<'_> {
 
     fn execute(self) -> io::Result<()> {
         match self {
-            Command::Exit { code } => Self::cmd_exit(code),
-            Command::Echo { args } => Self::cmd_echo(&args),
-            Command::Type { args } => Self::cmd_type(&args),
-            Command::Pwd => Self::cmd_pwd(),
-            Command::Cd { path } => Self::cmd_cd(path),
-            Command::Other { command, args } => Self::cmd(command, &args),
+            Self::Exit { code } => Self::cmd_exit(code),
+            Self::Echo { args } => Self::cmd_echo(&args),
+            Self::Type { args } => Self::cmd_type(&args),
+            Self::Pwd => Self::cmd_pwd(),
+            Self::Cd { path } => Self::cmd_cd(path),
+            Self::Other { command, args } => Self::cmd(command, &args),
         }
     }
 
