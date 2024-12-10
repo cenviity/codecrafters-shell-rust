@@ -30,10 +30,9 @@ impl<'a> Command<'a> {
 
     pub fn parse<'input: 'a>(tokens: Vec<&'input str>) -> Self {
         match tokens[..] {
-            ["exit", code] => {
-                let code: i32 = code.parse().expect("exit code should be a valid i32 value");
-                Self::Exit { code }
-            }
+            ["exit", code] => Self::Exit {
+                code: code.parse().expect("exit code should be a valid i32 value"),
+            },
             ["echo", ..] => Self::Echo {
                 args: tokens[1..].to_owned(),
             },
