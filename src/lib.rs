@@ -41,15 +41,9 @@ impl<'a> Command<'a> {
                 args: tokens[1..].to_owned(),
             },
             ["pwd"] => Self::Pwd,
-            ["cd", path] => {
-                let path = match path {
-                    "~" => PathBuf::from(
-                        env::var("HOME").expect("$HOME environment variable should exist"),
-                    ),
-                    _ => PathBuf::from(path),
-                };
-                Self::Cd { path }
-            }
+            ["cd", path] => Self::Cd {
+                path: parse_path(path),
+            },
             [command, ..] => Self::Other {
                 command,
                 args: tokens[1..].to_owned(),
@@ -122,6 +116,13 @@ impl<'a> Command<'a> {
             return Ok(());
         };
         io::stdout().write_all(&output.stdout)
+    }
+}
+
+fn parse_path(path: &str) -> PathBuf {
+    match path {
+        "~" => PathBuf::from(env::var("HOME").expect("$HOME environment variable should exist")),
+        _ => PathBuf::from(path),
     }
 }
 
