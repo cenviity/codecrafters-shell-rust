@@ -17,12 +17,37 @@ pub enum Command<'a> {
     },
     Pwd,
     Cd {
-        path: PathBuf,
+        path_type: PathType,
     },
     Other {
         command: &'a str,
         args: Vec<&'a str>,
     },
+}
+
+pub enum PathType {
+    HomeDir,
+    OtherPath(PathBuf),
+}
+
+impl PathType {
+    fn parse(path: &str) -> Self {
+        match path {
+            "~" => Self::HomeDir,
+            _ => Self::OtherPath(PathBuf::from(path)),
+        }
+    }
+}
+
+impl From<PathType> for PathBuf {
+    fn from(path_type: PathType) -> Self {
+        match path_type {
+            PathType::HomeDir => {
+                Self::from(env::var("HOME").expect("$HOME environment variable should exist"))
+            }
+            PathType::OtherPath(path) => path,
+        }
+    }
 }
 
 impl<'a> Command<'a> {
@@ -41,7 +66,7 @@ impl<'a> Command<'a> {
             },
             ["pwd"] => Self::Pwd,
             ["cd", path] => Self::Cd {
-                path: parse_path(path),
+                path_type: PathType::parse(path),
             },
             [command, ..] => Self::Other {
                 command,
@@ -57,7 +82,7 @@ impl<'a> Command<'a> {
             Self::Echo { args } => Self::cmd_echo(&args),
             Self::Type { args } => Self::cmd_type(&args),
             Self::Pwd => Self::cmd_pwd(),
-            Self::Cd { path } => Self::cmd_cd(path),
+            Self::Cd { path_type } => Self::cmd_cd(path_type),
             Self::Other { command, args } => Self::cmd(command, &args),
         }
     }
@@ -101,7 +126,8 @@ impl<'a> Command<'a> {
         Ok(())
     }
 
-    fn cmd_cd(path: PathBuf) -> io::Result<()> {
+    fn cmd_cd(path_type: PathType) -> io::Result<()> {
+        let path = PathBuf::from(path_type);
         if env::set_current_dir(&path).is_err() {
             eprintln!("cd: {}: No such file or directory", path.display());
         }
@@ -115,13 +141,6 @@ impl<'a> Command<'a> {
             return Ok(());
         };
         io::stdout().write_all(&output.stdout)
-    }
-}
-
-fn parse_path(path: &str) -> PathBuf {
-    match path {
-        "~" => PathBuf::from(env::var("HOME").expect("$HOME environment variable should exist")),
-        _ => PathBuf::from(path),
     }
 }
 
