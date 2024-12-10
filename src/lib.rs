@@ -6,19 +6,11 @@ use std::{
 };
 
 pub enum Command<'a> {
-    Exit {
-        code: i32,
-    },
-    Echo {
-        args: Vec<&'a str>,
-    },
-    Type {
-        args: Vec<&'a str>,
-    },
+    Exit(i32),
+    Echo(Vec<&'a str>),
+    Type(Vec<&'a str>),
     Pwd,
-    Cd {
-        path_type: PathType,
-    },
+    Cd(PathType),
     Other {
         command: &'a str,
         args: Vec<&'a str>,
@@ -55,19 +47,13 @@ impl<'a> Command<'a> {
 
     pub fn parse<'input: 'a>(tokens: Vec<&'input str>) -> Self {
         match tokens[..] {
-            ["exit", code] => Self::Exit {
-                code: code.parse().expect("exit code should be a valid i32 value"),
-            },
-            ["echo", ..] => Self::Echo {
-                args: tokens[1..].to_owned(),
-            },
-            ["type", ..] => Self::Type {
-                args: tokens[1..].to_owned(),
-            },
+            ["exit", code] => {
+                Self::Exit(code.parse().expect("exit code should be a valid i32 value"))
+            }
+            ["echo", ..] => Self::Echo(tokens[1..].to_owned()),
+            ["type", ..] => Self::Type(tokens[1..].to_owned()),
             ["pwd"] => Self::Pwd,
-            ["cd", path] => Self::Cd {
-                path_type: PathType::parse(path),
-            },
+            ["cd", path] => Self::Cd(PathType::parse(path)),
             [command, ..] => Self::Other {
                 command,
                 args: tokens[1..].to_owned(),
@@ -78,11 +64,11 @@ impl<'a> Command<'a> {
 
     pub fn execute(self) -> io::Result<()> {
         match self {
-            Self::Exit { code } => Self::cmd_exit(code),
-            Self::Echo { args } => Self::cmd_echo(&args),
-            Self::Type { args } => Self::cmd_type(&args),
+            Self::Exit(code) => Self::cmd_exit(code),
+            Self::Echo(args) => Self::cmd_echo(&args),
+            Self::Type(args) => Self::cmd_type(&args),
             Self::Pwd => Self::cmd_pwd(),
-            Self::Cd { path_type } => Self::cmd_cd(path_type),
+            Self::Cd(path_type) => Self::cmd_cd(path_type),
             Self::Other { command, args } => Self::cmd(command, &args),
         }
     }
